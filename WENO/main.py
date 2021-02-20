@@ -1,4 +1,4 @@
-from weno3 import WENO3
+from WENO.weno3 import WENO3
 
 import numpy as np
 import matplotlib.pyplot as plt
