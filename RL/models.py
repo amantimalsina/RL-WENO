@@ -32,7 +32,7 @@ class Pi(nn.Module):
         x = self.fc2(x)
         x = F.relu(x)
         x = self.fc3(x)
-        output = 2 * torch.tanh(x)  # The range of action space is from -2 to 2
+        output = torch.tanh(x)
 
         return output
 

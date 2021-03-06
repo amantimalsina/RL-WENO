@@ -87,7 +87,7 @@ class DDPGAgent:
         while not done:
             a = self.pi(torch.tensor(s, dtype=torch.float, device=self.device))
             a = a.item() # + self.noise()[0]
-            s_prime, r, done, _ = self.env.step([a])
+            s_prime, r, done, _ = self.env.step(a)
             if self.render:
                 self.env.render()
             self.buffer.push(transition=(s, a, r / 100.0, s_prime, done))

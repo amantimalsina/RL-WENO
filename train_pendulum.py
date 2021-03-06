@@ -1,6 +1,7 @@
-from rl.utils import plot_result
-from rl.agent import DDPGAgent
-from rl.models import Pi, Q
+from RL.envs import NormalizedEnv
+from RL.utils import plot_result
+from RL.agent import DDPGAgent
+from RL.models import Pi, Q
 
 import gym
 import pickle
@@ -8,7 +9,7 @@ from argparse import ArgumentParser
 
 
 def main(args):
-    env = gym.make('Pendulum-v0')
+    env = NormalizedEnv(gym.make('Pendulum-v0'))
     dim_state = env.observation_space.shape[0]
     dim_action = env.action_space.shape[0]
 
