@@ -1,4 +1,4 @@
-from utils import ReplayBuffer, OrnsteinUhlenbeckNoise
+from .utils import ReplayBuffer, OrnsteinUhlenbeckNoise
 
 import torch
 import torch.nn.functional as F
