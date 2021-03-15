@@ -47,19 +47,19 @@ class BurgersEnv:
         self.vb_minus[:3] = self.vb_minus[3]
         self.vb_minus[N + 4:] = self.vb_minus[N + 3]
 
-    def step(self):
+    def step(self, action):
         """
-        action: np.ndarray with shape the (??, 3) such that each row is weights for interpolation.
+        action: np.ndarray with shape the (N+3, 3) such that each row is weights for interpolation.
 
         (Future work)
-        Take an action and return (next state, reward, done, info)
+        Define reward function.
         """
         N = self.N
         y0 = self.state
 
         # RK1
-        vm, _ = interpolate(self.vb_plus, (3 / 10, 3 / 5, 1 / 10), N)
-        _, vp = interpolate(self.vb_minus, (3 / 10, 3 / 5, 1 / 10), N)
+        vm, _ = interpolate(self.vb_plus, action, N)
+        _, vp = interpolate(self.vb_minus, action, N)
 
         fminus = vm[1:N + 2] + vp[2:N + 3]
         fplus = vm[0:N + 1] + vp[1:N + 2]
@@ -71,8 +71,8 @@ class BurgersEnv:
         self.vb_minus[3:N + 4] = 1 / 2 * (1 / 2 * self.state ** 2 - self.state)
 
         # RK2
-        vm, _ = interpolate(self.vb_plus, (3 / 10, 3 / 5, 1 / 10), N)
-        _, vp = interpolate(self.vb_minus, (3 / 10, 3 / 5, 1 / 10), N)
+        vm, _ = interpolate(self.vb_plus, action, N)
+        _, vp = interpolate(self.vb_minus, action, N)
 
         fminus = vm[1:N + 2] + vp[2:N + 3]
         fplus = vm[0:N + 1] + vp[1:N + 2]
@@ -84,8 +84,8 @@ class BurgersEnv:
         self.vb_minus[3:N + 4] = 1 / 2 * (1 / 2 * self.state ** 2 - self.state)
 
         # RK 3
-        vm, _ = interpolate(self.vb_plus, (3 / 10, 3 / 5, 1 / 10), N)
-        _, vp = interpolate(self.vb_minus, (3 / 10, 3 / 5, 1 / 10), N)
+        vm, _ = interpolate(self.vb_plus, action, N)
+        _, vp = interpolate(self.vb_minus, action, N)
 
         fminus = vm[1:N + 2] + vp[2:N + 3]
         fplus = vm[0:N + 1] + vp[1:N + 2]
