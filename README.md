@@ -11,7 +11,7 @@ The two animation below show the numerical solutions of Burger's Equation over t
 ![weno-animation](./assets/weno-animation.gif)
 
 ## The reward function
-The total variation norm of an one dimensional signal is defined by $sum_{i=1}^{N-1}{|f(x_{i+1})-f(x_{i})|}$.
+The total variation norm of an one dimensional signal is defined by $\sum_{i=1}^{N-1}{|f(x_{i+1})-f(x_{i})|}$.
 For a numerical solution that contains the ossilliation, the total variation norm increases over time.
 ![tv-norm-over-time](./assets/tv-norm-over-time.png)  
 

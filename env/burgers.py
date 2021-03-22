@@ -1,4 +1,4 @@
-from .utils import interpolate
+from .utils import interpolate, maximum_temporal_difference, total_variation_norm
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -55,6 +55,7 @@ class BurgersEnv:
         Define reward function.
         """
         N = self.N
+        state_previous = self.state.copy()
         y0 = self.state
 
         # RK1
@@ -96,7 +97,12 @@ class BurgersEnv:
         self.vb_plus[3:N + 4] = 1 / 2 * (1 / 2 * self.state ** 2 + self.state)
         self.vb_minus[3:N + 4] = 1 / 2 * (1 / 2 * self.state ** 2 - self.state)
 
-        return self.state
+        # Reward calculation
+        tv_norm = total_variation_norm(self.state)
+        td_maximum = maximum_temporal_difference(self.state, state_previous)
+        reward = -1 * (tv_norm + td_maximum)
+
+        return self.state, reward, False, _
 
     def render(self):
         plt.cla()
