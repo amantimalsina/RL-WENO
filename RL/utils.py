@@ -35,7 +35,7 @@ class ReplayBuffer:
 
 
 class OrnsteinUhlenbeckNoise:
-    def __init__(self, mu, theta=0.1, dt=0.01, sigma=0.1):
+    def __init__(self, mu, theta=0.15, dt=0.01, sigma=0.2):
         self.mu = mu
         self.theta = theta
         self.dt = dt
