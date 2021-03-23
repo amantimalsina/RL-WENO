@@ -23,8 +23,10 @@ class ReplayBuffer:
         batch = random.sample(self.buffer, batch_size)
         s, a, r, s_prime, done = map(np.float32, zip(*batch))
 
+        s = np.vstack(s)
+        s_prime = np.vstack(s_prime)
+        a = np.vstack(a)
         # Convert row vectors to columns vectors
-        a = a.reshape((-1, 1))
         r = r.reshape((-1, 1))
         done = done.reshape((-1, 1))
 

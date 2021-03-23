@@ -1,20 +1,22 @@
 from env import BurgersEnv
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 if __name__ == '__main__':
     env = BurgersEnv()
     rewards = []
-    for i in range(200):
+
+    s, _ = env.reset()
+    done = False
+
+    while not done:
         env.render()
         trivial_action = [3 / 10, 3 / 5, 1 / 10]
-        action = np.array([trivial_action for i in range(400 + 3)])
-        _, reward, _, _ = env.step(action)
-        rewards.append(reward)
+        a = np.array([trivial_action for i in range(400 + 3)])
+        s_prime, r, done, info = env.step(a)
 
-    plt.figure(figsize=(8, 5))
-    plt.plot(rewards, 'bo-', markersize=3)
-    plt.grid(axis='y')
-    plt.show()
+        s = s_prime
+        done = done[0]
+
+    print("Baseline reward: ", r.sum())

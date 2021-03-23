@@ -1,4 +1,4 @@
-from .utils import ReplayBuffer, OrnsteinUhlenbeckNoise
+from .utils import ReplayBuffer
 
 import torch
 import numpy as np
@@ -32,9 +32,6 @@ class DDPGAgent:
         self.warmup_step = warmup_step
         self.render = render
         self.buffer = ReplayBuffer(1000000)
-        self.noise = OrnsteinUhlenbeckNoise(mu=np.zeros(self.env.action_space.shape[0]))
-        self.epsilon = 1
-        self.epsilon_decay = 1e-5
 
         # If training mode, set networks to training mode and define optimizers.
         self.mode = mode
@@ -80,7 +77,7 @@ class DDPGAgent:
             target_param.data.copy_(self.tau * param.data + (1.0 - self.tau) * target_param.data)
 
     def run_episode(self):
-        s = deepcopy(self.env.reset())
+        s, _ = deepcopy(self.env.reset())
         if self.render:
             self.env.render()
         done = False
@@ -88,15 +85,14 @@ class DDPGAgent:
         score = 0.0
         while not done:
             a = self.pi(torch.tensor(s, dtype=torch.float, device=self.device))
-            a = a.item() + self.noise()[0] * max(0, self.epsilon)
-            a = np.clip(a, -1, 1)
+            a = a.cpu().detach().numpy()
             s_prime, r, done, _ = self.env.step(a)
             if self.render:
                 self.env.render()
-            self.buffer.push(transition=(s, a, r / 100.0, s_prime, done))
+            self.buffer.push(transition=(s, a, r, s_prime, done))
+            done = done[0]
             s = s_prime
-            score += r
-            self.epsilon -= self.epsilon_decay
+            score += np.sum(r)
 
             if self.mode == 'train' and self.buffer.size() > self.warmup_step:
                 self.train()
