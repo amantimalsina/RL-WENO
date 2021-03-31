@@ -1,5 +1,6 @@
 from .utils import ReplayBuffer
 
+import os
 import torch
 import numpy as np
 
@@ -7,7 +8,10 @@ from copy import deepcopy
 
 
 class DDPGAgent:
-    def __init__(self, env, pi, q, gamma, tau, batch_size, lr_pi, lr_q, warmup_step, mode='train', render=False):
+    def __init__(self, env, pi, q, gamma, tau, batch_size, lr_pi, lr_q, warmup_step,
+                 mode='train',
+                 render=False,
+                 dir_save='./outputs'):
         # Initialize environment
         self.env = env
 
@@ -42,12 +46,18 @@ class DDPGAgent:
             self.q_target.train()
             self.optimizer_pi = torch.optim.Adam(self.pi.parameters(), lr=lr_pi)
             self.optimizer_q = torch.optim.Adam(self.q.parameters(), lr=lr_q)
+            self.best_score = 0
 
         else:
             self.pi.eval()
             self.q.eval()
             self.pi_target.eval()
             self.q_target.eval()
+
+        # Create the directory where the models will be saved.
+        self.dir_save = dir_save
+        if not os.path.exists(dir_save):
+            os.mkdir(dir_save)
 
     def train(self):
         s, a, r, s_prime, done = self.buffer.sample(self.batch_size)
@@ -76,6 +86,10 @@ class DDPGAgent:
         for param, target_param in zip(self.q.parameters(), self.q_target.parameters()):
             target_param.data.copy_(self.tau * param.data + (1.0 - self.tau) * target_param.data)
 
+    def save(self):
+        torch.save(self.pi.state_dict(), f'{self.dir_save}/best_model_pi.bin')
+        torch.save(self.q.state_dict(), f'{self.dir_save}/best_model_q.bin')
+
     def run_episode(self):
         s, _ = deepcopy(self.env.reset())
         if self.render:
@@ -84,17 +98,28 @@ class DDPGAgent:
 
         score = 0.0
         while not done:
+            # Choose an action
             a = self.pi(torch.tensor(s, dtype=torch.float, device=self.device))
             a = a.cpu().detach().numpy()
+            # Observe reward and next state
             s_prime, r, done, _ = self.env.step(a)
+            # Draw current state
             if self.render:
                 self.env.render()
+            # Store experience
             self.buffer.push(transition=(s, a, r, s_prime, done))
+
+            # Finish timestep
             done = done[0]
             s = s_prime
             score += np.sum(r)
 
             if self.mode == 'train' and self.buffer.size() > self.warmup_step:
                 self.train()
+
+        # Finish episode
+        if score >= self.best_score:
+            self.best_score = score
+            self.save()
 
         return score

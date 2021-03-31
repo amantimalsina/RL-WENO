@@ -1,4 +1,4 @@
-from .utils import interpolate, maximum_temporal_difference, total_variation_norm
+from .utils import interpolate
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,6 +23,31 @@ class BurgersEnv:
         self.u = None
         self.state = None
         self.reset()
+
+    @staticmethod
+    def _calculate_reward(u, u_prev, t):
+        """
+        Calculate reward
+        """
+        N = len(u) - 1
+        # TV norm for each 5 points
+        ub = np.zeros(len(u) + 7)
+        ub[3:N + 4] = u
+        tv_vector = np.abs(ub[1:] - ub[:-1])  # vector whose each elements is u_{i+1} - u_{i}
+        tv_matrix = np.stack([tv_vector[i:i + 5] for i in range(N + 3)])  # Stack all consecutive 5 points
+        tv_norm = np.sum(tv_matrix, axis=1)  # Summation of each row
+
+        # Maximum temporal difference for each 5 points
+        ub_prev = np.zeros(len(u) + 6)
+        ub_prev[3:N + 4] = u_prev
+        td_vector = np.abs(ub[:-1] - ub_prev)  # vector whose each elements is u_{i}^{t} - u_{i}^{t-1}
+        td_matrix = np.stack([td_vector[i:i + 5] for i in range(N + 3)])  # Stack all consecutive 5 points
+        td_maximum = np.max(td_matrix, axis=1)  # Apply maximum to each row
+
+        # Total reward
+        reward = -1 * (tv_norm + 10 * td_maximum) + np.repeat(t, N + 3)
+
+        return reward
 
     def reset(self):
         """
@@ -68,24 +93,18 @@ class BurgersEnv:
         self.u = y1
         self.state[3:N + 4] = 1 / 2 * self.u ** 2
 
-        # Reward calculation - tv-norm
-        ub = np.zeros(len(self.u) + 7)
-        ub[3:N + 4] = self.u
-        tv_vector = np.abs(ub[1:] - ub[:-1])  # vector whose each elements is u_{i+1} - u_{i}
-        tv_matrix = np.stack([tv_vector[i:i + 5] for i in range(N + 3)])  # Stack all consecutive 5 points
-        tv_norm = np.sum(tv_matrix, axis=1)  # Summation of each row
+        # Calculate reward
+        reward = self._calculate_reward(self.u, u_prev, self.t)
 
-        ub_prev = np.zeros(len(self.u) + 6)
-        ub_prev[3:N + 4] = u_prev
-        td_vector = np.abs(ub[:-1] - ub_prev)  # vector whose each elements is u_{i}^{t} - u_{i}^{t-1}
-        td_matrix = np.stack([td_vector[i:i + 5] for i in range(N + 3)])  # Stack all consecutive 5 points
-        td_maximum = np.max(td_matrix, axis=1)
-        reward = -1 * (tv_norm + td_maximum)  # Apply maximum to each row
-
+        # Set next state
         state = np.stack([self.state[i:i + 5] for i in range(N + 3)])
+
+        # Verify episode
         self.t += self.dt
-        done = (self.t >= self.T) or (np.any(np.abs(state) > 2))
-        done = np.repeat(done, N+3)
+        done = (self.t >= self.T) or (np.any(np.abs(self.u) > 1.1))
+        done = np.repeat(done, N + 3)
+
+        # Give info
         info = {'u': self.u}
 
         return state, reward, done, info
@@ -96,4 +115,4 @@ class BurgersEnv:
         plt.xlim(-1, 1)
         plt.ylim(-1.2, 1.2)
         plt.plot(self.x, self.u, 'o-b', markersize=3, fillstyle='none', linewidth=1, alpha=0.4)
-        plt.pause(0.0001)
+        plt.pause(0.00001)

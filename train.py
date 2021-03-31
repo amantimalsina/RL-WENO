@@ -10,8 +10,8 @@ from argparse import ArgumentParser
 def main(args):
     env = BurgersEnv()
 
-    pi = Pi()
-    q = Q()
+    pi = Pi(args.dim_hidden1, args.dim_hidden2)
+    q = Q(args.dim_hidden1, args.dim_hidden2)
     agent = DDPGAgent(
         env,
         pi,
@@ -22,7 +22,8 @@ def main(args):
         lr_pi=args.lr_pi,
         lr_q=args.lr_q,
         warmup_step=args.warmup_step,
-        render=args.render
+        render=args.render,
+        dir_save=args.dir_save
     )
 
     scores = 0.0
@@ -34,8 +35,8 @@ def main(args):
             history.append(scores / args.print_interval)
             scores = 0.0
 
-    # with open("./ddpg.pkl", 'wb') as f:
-    #     pickle.dump(history, f)
+    with open(f'{args.dir_save}/history.pkl', 'wb') as f:
+        pickle.dump(history, f)
 
     plot_result(history, args.print_interval)
 
@@ -46,13 +47,14 @@ def get_arguments():
     parser.add_argument('--dim_hidden2', type=int, default=300)
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--tau', type=float, default=0.001)
-    parser.add_argument('--batch_size', type=int, default=1)
-    parser.add_argument('--warmup_step', type=int, default=0)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--warmup_step', type=int, default=32)
     parser.add_argument('--lr_pi', type=float, default=0.0001)
     parser.add_argument('--lr_q', type=float, default=0.001)
-    parser.add_argument('--n_episodes', type=int, default=100)
-    parser.add_argument('--print_interval', type=int, default=1)
+    parser.add_argument('--n_episodes', type=int, default=10000)
+    parser.add_argument('--print_interval', type=int, default=10)
     parser.add_argument('--render', type=int, default=0)
+    parser.add_argument('--dir_save', type=str, default='./outputs')
     args = parser.parse_args()
 
     return args

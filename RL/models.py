@@ -15,13 +15,14 @@ def fanin_(size):
 
 
 class Pi(nn.Module):
-    def __init__(self, dim_hidden=32):
+    def __init__(self, dim_hidden1, dim_hidden2):
         super(Pi, self).__init__()
-        self.fc1 = nn.Linear(5, dim_hidden)
-        self.fc2 = nn.Linear(dim_hidden, dim_hidden)
-        self.fc3 = nn.Linear(dim_hidden, 3)
+        self.fc1 = nn.Linear(5, dim_hidden1)
+        self.fc2 = nn.Linear(dim_hidden1, dim_hidden2)
+        self.fc3 = nn.Linear(dim_hidden2, 3)
 
     def forward(self, x):
+        x = x - torch.mean(x, axis=1).unsqueeze(1)
         x = self.fc1(x)
         x = F.relu(x)
         x = self.fc2(x)
@@ -32,13 +33,14 @@ class Pi(nn.Module):
 
 
 class Q(nn.Module):
-    def __init__(self, dim_hidden1=32, dim_hidden2=16):
+    def __init__(self, dim_hidden1, dim_hidden2):
         super(Q, self).__init__()
         self.fc1 = nn.Linear(5, dim_hidden1)
         self.fc2 = nn.Linear(dim_hidden1 + 3, dim_hidden2)
         self.fc3 = nn.Linear(dim_hidden2, 1)
 
     def forward(self, s, a):
+        s = s - torch.mean(s, axis=1).unsqueeze(1)
         x = self.fc1(s)
         x = F.relu(x)
         x = self.fc2(torch.cat([x, a], dim=1))
