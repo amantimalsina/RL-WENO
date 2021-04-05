@@ -1,1 +1,1 @@
-from .burgers import BurgersEnv
+from .burgers import BurgersEnv, BurgersFluxEnv

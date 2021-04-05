@@ -6,7 +6,7 @@ import torch
 
 DIM_HIDDEN1 = 400
 DIM_HIDDEN2 = 300
-DIR_WEIGHT = './outputs/0330/best_model_pi.bin'
+DIR_WEIGHT = './outputs/0331_flux/best_model_pi.bin'
 
 
 if __name__ == '__main__':
@@ -17,20 +17,21 @@ if __name__ == '__main__':
     pi.load_state_dict(state_dict)
 
     with torch.no_grad():
-        s, _ = env.reset()
-        done = False
-
         t = 0
         score = 0
+        done = False
+        s = env.reset()
         while t < 200:
             env.render()
             a = pi(torch.tensor(s, dtype=torch.float))
             a = a.detach().numpy()
-            s_prime, r, done, info = env.step(a)
+            s_prime, r, dones, info = env.step(a)
 
-            score += r.sum()
-            s = s_prime
-            done = done[0]
+            # Finish a timestep
+            if not done:
+                score += r.sum()
             t += 1
+            s = s_prime
+            done = dones[0]
 
     print("Model's reward: ", score)

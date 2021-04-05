@@ -3,19 +3,19 @@ from RL.agent import DDPGAgent
 from RL.models import Pi, Q
 
 import pickle
-from env import BurgersEnv
+from env import BurgersFluxEnv
 from argparse import ArgumentParser
 
 
 def main(args):
-    env = BurgersEnv()
+    env = BurgersFluxEnv()
 
     pi = Pi(args.dim_hidden1, args.dim_hidden2)
     q = Q(args.dim_hidden1, args.dim_hidden2)
     agent = DDPGAgent(
-        env,
-        pi,
-        q,
+        env=env,
+        pi=pi,
+        q=q,
         gamma=args.gamma,
         tau=args.tau,
         batch_size=args.batch_size,
@@ -29,16 +29,22 @@ def main(args):
     scores = 0.0
     history = []
     for i in range(args.n_episodes):
-        scores += agent.run_episode()
+        # Run one episode and store the episode's score
+        score = agent.run_episode()
+        scores += score
+        history.append(score)
+
+        # Print out the average of last 'print_interval' scores
         if (i+1) % args.print_interval == 0:
             print(f"[Episode {i+1}] Avg Score: {scores / args.print_interval}")
-            history.append(scores / args.print_interval)
             scores = 0.0
 
+    # Save the history
     with open(f'{args.dir_save}/history.pkl', 'wb') as f:
         pickle.dump(history, f)
 
-    plot_result(history, args.print_interval)
+    # Plot history
+    plot_result(history)
 
 
 def get_arguments():
