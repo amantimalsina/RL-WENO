@@ -86,12 +86,8 @@ class DDPGAgent:
         for param, target_param in zip(self.q.parameters(), self.q_target.parameters()):
             target_param.data.copy_(self.tau * param.data + (1.0 - self.tau) * target_param.data)
 
-    def save(self):
-        torch.save(self.pi.state_dict(), f'{self.dir_save}/best_model_pi.bin')
-        torch.save(self.q.state_dict(), f'{self.dir_save}/best_model_q.bin')
-
     def run_episode(self):
-        s, _ = deepcopy(self.env.reset())
+        s = deepcopy(self.env.reset())
         if self.render:
             self.env.render()
         done = False
@@ -117,9 +113,12 @@ class DDPGAgent:
             if self.mode == 'train' and self.buffer.size() > self.warmup_step:
                 self.train()
 
-        # Finish episode
+        # Finish the episode
+        torch.save(self.pi.state_dict(), f'{self.dir_save}/last_pi.bin')
+        torch.save(self.q.state_dict(), f'{self.dir_save}/last_pi.bin')
         if score >= self.best_score:
             self.best_score = score
-            self.save()
+            torch.save(self.pi.state_dict(), f'{self.dir_save}/best_pi.bin')
+            torch.save(self.q.state_dict(), f'{self.dir_save}/best_q.bin')
 
         return score
