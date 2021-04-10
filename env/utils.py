@@ -21,3 +21,29 @@ def interpolate(vb, weights, N):
         vp[i] = weights[i, 2] * vp0 + weights[i, 1] * vp1 + weights[i, 0] * vp2
 
     return vm, vp
+
+
+def total_variation_norm(x):
+    """
+    The total variation norm of an one dimensional signal is defined by \sum_{i=0}^{N-1}{|f(x_{i+1})-f(x_{i})|}.
+    
+    Parameters
+    ----------
+    x: np.ndarray whose "ndim" attribute is equal to 1.
+    
+    References
+    ----------
+    https://en.wikipedia.org/wiki/Total_variation_denoising#1D_signal_series
+    """
+    return np.sum(np.abs(x[1:] - x[:-1]))
+
+
+def maximum_temporal_difference(x, x_prime):
+    """
+    The maximum of temporal differences
+
+    Parameters
+    ----------
+    x, x_prime: np.ndarray whose "ndim" attribute is equal to 1.
+    """
+    return np.max(np.abs(x_prime - x))

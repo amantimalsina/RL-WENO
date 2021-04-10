@@ -64,7 +64,7 @@ def get_arguments():
     parser.add_argument('--lr_pi', type=float, default=0.0001)
     parser.add_argument('--lr_q', type=float, default=0.001)
     parser.add_argument('--n_episodes', type=int, default=10000)
-    parser.add_argument('--print_interval', type=int, default=10)
+    parser.add_argument('--print_interval', type=int, default=1)
     parser.add_argument('--render', type=int, default=0)
     args = parser.parse_args()
 

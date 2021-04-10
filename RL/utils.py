@@ -23,8 +23,10 @@ class ReplayBuffer:
         batch = random.sample(self.buffer, batch_size)
         s, a, r, s_prime, done = map(np.float32, zip(*batch))
 
+        s = np.vstack(s)
+        s_prime = np.vstack(s_prime)
+        a = np.vstack(a)
         # Convert row vectors to columns vectors
-        a = a.reshape((-1, 1))
         r = r.reshape((-1, 1))
         done = done.reshape((-1, 1))
 
@@ -35,7 +37,7 @@ class ReplayBuffer:
 
 
 class OrnsteinUhlenbeckNoise:
-    def __init__(self, mu, theta=0.1, dt=0.01, sigma=0.1):
+    def __init__(self, mu, theta=0.15, dt=0.01, sigma=0.2):
         self.mu = mu
         self.theta = theta
         self.dt = dt
@@ -50,7 +52,7 @@ class OrnsteinUhlenbeckNoise:
         return x
 
 
-def plot_result(history, interval):
+def plot_result(history, interval=1):
     """
     reference: https://tykimos.github.io/2017/07/09/Training_Monitoring/
     """
@@ -58,7 +60,7 @@ def plot_result(history, interval):
     x = interval * np.arange(0, len(history))
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(x, history,'b-', label='Reward')
+    ax.plot(x, history, 'b-', label='Reward')
     ax.set_xlabel('Episode', fontsize=15)
     ax.set_ylabel('Reward', fontsize=15)
     ax.set_title('The average rewards of last 100 episodes', fontsize=15)
