@@ -22,7 +22,6 @@ For a numerical solution that contains the ossilliation, the total variation nor
 We also defined a way to measure osilliation such that
 $$\max_{i=1,\cdots,N}(|f({x_i}^{t})-f({x_i}^{t-1})|)$$
 at each time step $t=1, \cdots, T$. We referred to it as the maximum value of *temporal differences* over spatial domain at timestep $t$.
-![td-over-time](./assets/td-over-time.png)
 
 ## References
 [0] Yufei Wang, Ziju Shen, Zichao Long & Bin Dong. (2020). Learning to Discretize: Solving 1D Scalar Conservation Laws via Deep Reinforcement Learning. Communications in Computational Physics. 28 (5). 2158-2179. doi:[10.4208/cicp.OA-2020-0194](https://global-sci.org/intro/article_detail/cicp/18408.html). <br/>
